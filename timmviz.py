@@ -15,7 +15,7 @@ from PIL import Image
 import torch.nn.functional as F
 
 @st.cache_data
-def prepare_feature_maps(_model, pretrained):
+def prepare_feature_maps(_model, model_name, pretrained):
     model = _model
     model.to('cuda')
     model.eval()
@@ -38,7 +38,7 @@ def prepare_feature_maps(_model, pretrained):
         for j, feature_j in enumerate(features_layer_i[0][:8]):
             feature_j = feature_j.unsqueeze(0).unsqueeze(0)
             h,w = img.shape[-2], img.shape[-1]
-            fname = f'fmaps/pretrained_{pretrained}/{i:03}_{j:03}.jpg'
+            fname = f'fmaps/{model_name}/pretrained_{pretrained}/{i:03}_{j:03}.jpg'
             feature_j = F.interpolate(feature_j, size=[h,w], mode='bicubic')
             #feature_j = feature_j.expand(1,3, -1, -1)
             print(feature_j.shape, img.shape)
@@ -144,7 +144,7 @@ with col2:
 
 # Feature map visualization
 
-image_files = prepare_feature_maps(model, pretrained=st.session_state.pretrained)
+image_files = prepare_feature_maps(model,model_name, pretrained=st.session_state.pretrained)
 print(st.session_state.pretrained)
 with st.container():
     st.write("## Feature maps")
