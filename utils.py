@@ -51,9 +51,6 @@ def show_hist(x, nbins):
     # Convert PyTorch tensor to numpy array
     x = x.numpy().flatten()
     
-    # Create histogram using numpy
-    counts, bins = np.histogram(x, bins=nbins)
-    
     # Find most common value
     mean = x.mean()
     
