@@ -163,11 +163,12 @@ if not model_is_supported:
     st.markdown(f'`More Logs : {st.session_state.logs[-1]}`')
 else:
     # disable gradient and create df
-    df = pd.DataFrame(columns=['module', 'shape'])
+    module_list = []
     for name, param in model.named_parameters():
         param.requires_grad = False
-        df = df.append({'module': name, 'shape': param.shape}, ignore_index=True)
-
+        module_list.append({'module': name, 'shape': param.shape})
+        df = pd.DataFrame.from_records(module_list)
+        df.columns=['module', 'shape']
 
     with st.sidebar:
         st.markdown("## Parameters")
