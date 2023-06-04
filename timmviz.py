@@ -40,7 +40,7 @@ def prepare_feature_maps(_model, model_name, _img, img_name, pretrained):
     # Moves images and model to cpu
     img = img.cpu()
     model = model.cpu()
-    all_layers_features = [x.cpu() for x in features]
+    all_layers_features = [x.cpu().numpy() for x in features]
 
     prefix = f'fmaps/{model_name}/pretrained_{pretrained}'
     if not os.path.exists(prefix):
@@ -58,9 +58,7 @@ def save_fmaps2(img, all_layers_features, prefix):
     #import ipdb; ipdb.set_trace()
     for i, features_layer_i in enumerate(all_layers_features):
         for j, feature_j in enumerate(features_layer_i[0][:35]):
-            feature_j = feature_j.unsqueeze(0).unsqueeze(0)
-            feature_j = F.interpolate(feature_j, size=[h,w], mode='bicubic')
-            feature_j = feature_j.squeeze(0).permute(1,2,0).numpy()
+            feature_j = cv2.resize(feature_j, (w,h))
             feature_j = feature_j - feature_j.min()
             feature_j = feature_j / feature_j.max() * 255
             feature_j = feature_j.astype(np.uint8)
