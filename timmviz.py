@@ -17,8 +17,8 @@ import builtins
 import urllib
 import seaborn as sns
 import torchvision.transforms.functional as transform
-
-sns.set()
+import cv2
+#sns.set()
 
 # deep lab → senza la parte di (decoder) e viceversa
 # saliency detection (unsupervised)
@@ -42,10 +42,40 @@ def prepare_feature_maps(_model, model_name, _img, img_name, pretrained):
     model = model.cpu()
     all_layers_features = [x.cpu() for x in features]
 
-    # Save feature maps
+    prefix = f'fmaps/{model_name}/pretrained_{pretrained}'
+    if not os.path.exists(prefix):
+        os.makedirs(prefix)
+    return save_fmaps2(img, all_layers_features, prefix)
+
+def save_fmaps2(img, all_layers_features, prefix):
+    h,w = img.shape[-2], img.shape[-1]
+    img = img.squeeze(0).permute(1,2,0).numpy()
+    img = img - img.min()
+    img = img / img.max() * 255
+    img = img.astype(np.uint8)
+    
+    fnames = []
+    #import ipdb; ipdb.set_trace()
+    for i, features_layer_i in enumerate(all_layers_features):
+        for j, feature_j in enumerate(features_layer_i[0][:35]):
+            feature_j = feature_j.unsqueeze(0).unsqueeze(0)
+            feature_j = F.interpolate(feature_j, size=[h,w], mode='bicubic')
+            feature_j = feature_j.squeeze(0).permute(1,2,0).numpy()
+            feature_j = feature_j - feature_j.min()
+            feature_j = feature_j / feature_j.max() * 255
+            feature_j = feature_j.astype(np.uint8)
+            feature_j = cv2.applyColorMap(feature_j, cv2.COLORMAP_JET)
+            heatmap = cv2.addWeighted(img, 0.45, feature_j, 0.55, 0)
+            fname = f'{prefix}/{i:03}_{j:03}.jpg'
+            cv2.imwrite(fname, heatmap)
+            fnames.append(fname)
+    return fnames
+
+def save_fmaps(img, all_layers_features, pretrained):
+   # Save feature maps
     fnames = []
     for i, features_layer_i in enumerate(all_layers_features):
-        for j, feature_j in enumerate(features_layer_i[0][:5]):
+        for j, feature_j in enumerate(features_layer_i[0][:35]):
             feature_j = feature_j.unsqueeze(0).unsqueeze(0)
             h,w = img.shape[-2], img.shape[-1]
             fname = f'fmaps/{model_name}/pretrained_{pretrained}/{i:03}_{j:03}.jpg'
@@ -54,11 +84,11 @@ def prepare_feature_maps(_model, model_name, _img, img_name, pretrained):
             print(feature_j.dtype, img.dtype)
             print(feature_j.shape, img.shape)
             print(feature_j.min(), feature_j.max(), img.min(), img.max())
+            print(img[0].dtype, type(img[0]))
             ts.overlay([img[0], feature_j[0]], cmap='coolwarm', save_as=fname, alpha=[1, 0.8])
             #ts.save(feature_j, path=fname, cmap='coolwarm')
             fnames.append(fname)
     return fnames
-
 
 @st.cache_data
 def load_model(model_name, pretrained):
@@ -182,6 +212,8 @@ else:
         # File uploader
         st.markdown(f"## Upload picture")
         img_file_buffer = st.file_uploader('upload your image')
+        if img_file_buffer is not None:
+            st.image(img_file_buffer, width=300, caption='Uploaded Image')  
  
         show_filters(tensor, selected_module)
 
