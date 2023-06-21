@@ -3,4 +3,6 @@ imgs/
 fmaps/
 test/
 runs/
+input_imgs/
+.vscode/
 *.jpg
