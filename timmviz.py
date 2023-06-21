@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import timm
 import  streamlit_toggle as tog
-from utils import model_size
+#from utils import model_size
 import os
 from PIL import Image
 import urllib
@@ -11,6 +11,16 @@ import cv2
 import pickle as pkl
 from collections import defaultdict
 import cmapy
+import pandas as pd
+
+def model_size(model):
+    """ Prints model info """
+    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    mb = (params * 32) / 2**23
+    gb = (params * 32) / 2**33
+    #return params, mb, gb
+    dictionary = {'Params': [params], 'MB': [f'{mb:.2f}'], 'GB': [f'{gb:.2f}']}
+    return pd.DataFrame(dictionary)
 
 def to_255(x):
     return (x - x.min()) / (x.max() - x.min()) * 255
