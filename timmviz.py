@@ -180,36 +180,36 @@ else:
         
         fname=f'{prefix}/{st.session_state.img_file_buffer.name.split(".")[0]}'
         
-        #try:
-        len_fmaps = prepare_feature_maps(model, tensor_image, fname)
+        try:
+            len_fmaps = prepare_feature_maps(model, tensor_image, fname)
 
-        # slider to select number of feature maps
-        with st.sidebar:
-            num_fmaps = []
-            for i in range(len(len_fmaps)):
-                number = st.number_input(f'Number of feature maps in layer {i+1}', 1, len_fmaps[i], 10)
-                num_fmaps.append(number)
+            # slider to select number of feature maps
+            with st.sidebar:
+                num_fmaps = []
+                for i in range(len(len_fmaps)):
+                    number = st.number_input(f'Number of activation maps in layer {i+1}', 1, len_fmaps[i], 10)
+                    num_fmaps.append(number)
 
-        image_files = create_plots(fname, num_fmaps)
+            image_files = create_plots(fname, num_fmaps)
 
-        with st.container():
-            st.write("## Feature maps")
-            img_dict = defaultdict(list)
+            with st.container():
+                st.write("## Activation maps")
+                img_dict = defaultdict(list)
 
-            for i, image_path in enumerate(image_files):
-                layer = image_path.split('/')[-1].split('_')[0]
-                img_dict[layer].append(open(image_path, 'rb').read())
-                #feature = image_path.split('/')[-1].split('_')[1].split('.')[0]
-                #image_captions.append(f'{int(layer)}.{int(feature)}')
+                for i, image_path in enumerate(image_files):
+                    layer = image_path.split('/')[-1].split('_')[0]
+                    img_dict[layer].append(open(image_path, 'rb').read())
+                    #feature = image_path.split('/')[-1].split('_')[1].split('.')[0]
+                    #image_captions.append(f'{int(layer)}.{int(feature)}')
 
-            for k in img_dict.keys():
-                st.write(f'### Layer {int(k)+1}')
-                images = img_dict[k]
-                image_captions = [f'{i}' for i in range(len(images))]
-                st.image(images,width=200,caption=image_captions)
+                for k in img_dict.keys():
+                    st.write(f'### Layer {int(k)+1}')
+                    images = img_dict[k]
+                    image_captions = [f'{i}' for i in range(len(images))]
+                    st.image(images,width=200,caption=image_captions)
 
-        # except Exception as e:
-        #     st.session_state.logs.append("The forward failed for some reason. Check your input image!")
-        #     st.markdown(f"# {st.session_state.logs[-1]}")
-        #     print(e)
-        #     st.stop()
+        except Exception as e:
+            st.session_state.logs.append("The forward failed for some reason. Check your console!")
+            st.markdown(f"# {st.session_state.logs[-1]}")
+            print(e)
+            st.stop()
