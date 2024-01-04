@@ -4,7 +4,7 @@ Application which uses streamlit to show activation maps of timm models that imp
 
 ### Requirements
 
-`pip install streamlit numpy timm streamlit_toggle pillow urllib python-opencv cmapy pandas`
+`pip install streamlit numpy timm streamlit-toggle-switch Pillow opencv-python cmapy pandas`
 
 ### Run
 
